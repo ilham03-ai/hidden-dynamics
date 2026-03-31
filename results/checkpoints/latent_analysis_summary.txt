@@ -1,0 +1,1 @@
+Posterior latents retain a usable but incomplete linear signal for the hidden armed state. The first two principal components show visible separation between armed and unarmed states. Trajectory phase leaves a measurable gradient in the leading latent directions. Hidden and visible variables remain at least partly entangled in the low-dimensional projection.

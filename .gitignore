@@ -1,0 +1,8 @@
+.venv/
+.mplconfig/
+__pycache__/
+*.pyc
+data/*.npz
+results/checkpoints/*.pt
+results/checkpoints/*.json
+results/figures/*.png
