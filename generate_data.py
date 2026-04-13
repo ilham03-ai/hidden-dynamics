@@ -195,7 +195,7 @@ def run_generation() -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Generate reproducible trajectory data for world-model-lab.")
+    parser = argparse.ArgumentParser(description="Generate reproducible trajectory data for Hidden Dynamics.")
     parser.parse_args()
     manifest = run_generation()
     for split_name, split_path in manifest.items():

@@ -11,7 +11,7 @@ from train import run_training
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run the world-model-lab research pipeline.")
+    parser = argparse.ArgumentParser(description="Run the Hidden Dynamics research pipeline.")
     parser.add_argument(
         "stage",
         choices=["generate", "train", "evaluate", "rollout", "analyze", "all"],

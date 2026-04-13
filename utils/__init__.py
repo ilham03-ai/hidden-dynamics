@@ -1,1 +1,1 @@
-# Utility package for world-model-lab.
+# Utility package for Hidden Dynamics.

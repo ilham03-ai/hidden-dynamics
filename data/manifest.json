@@ -1,5 +1,5 @@
 {
-  "test": "/Users/utente/pp1/world-model-lab/data/test.npz",
-  "train": "/Users/utente/pp1/world-model-lab/data/train.npz",
-  "val": "/Users/utente/pp1/world-model-lab/data/val.npz"
+  "test": "/Users/utente/pp1/hidden-dynamics/data/test.npz",
+  "train": "/Users/utente/pp1/hidden-dynamics/data/train.npz",
+  "val": "/Users/utente/pp1/hidden-dynamics/data/val.npz"
 }

@@ -118,17 +118,17 @@ Interpretation:
 
 Representative artifacts:
 
-- [results/figures/counterfactual_rollout.png](/Users/utente/pp1/world-model-lab/results/figures/counterfactual_rollout.png)
-- [results/figures/rollout_example.png](/Users/utente/pp1/world-model-lab/results/figures/rollout_example.png)
-- [results/figures/rollout_horizon_error.png](/Users/utente/pp1/world-model-lab/results/figures/rollout_horizon_error.png)
-- [results/figures/latent_pca_armed.png](/Users/utente/pp1/world-model-lab/results/figures/latent_pca_armed.png)
-- [results/figures/latent_pca_beacon_lit.png](/Users/utente/pp1/world-model-lab/results/figures/latent_pca_beacon_lit.png)
-- [results/figures/latent_pca_timestep.png](/Users/utente/pp1/world-model-lab/results/figures/latent_pca_timestep.png)
-- [results/figures/rollout_failure_cases.png](/Users/utente/pp1/world-model-lab/results/figures/rollout_failure_cases.png)
-- [results/figures/counterfactual_failure_case.png](/Users/utente/pp1/world-model-lab/results/figures/counterfactual_failure_case.png)
-- [results/checkpoints/evaluation_metrics.json](/Users/utente/pp1/world-model-lab/results/checkpoints/evaluation_metrics.json)
-- [results/checkpoints/latent_analysis_summary.json](/Users/utente/pp1/world-model-lab/results/checkpoints/latent_analysis_summary.json)
-- [results/checkpoints/failure_analysis.json](/Users/utente/pp1/world-model-lab/results/checkpoints/failure_analysis.json)
+- [results/figures/counterfactual_rollout.png](/Users/utente/pp1/hidden-dynamics/results/figures/counterfactual_rollout.png)
+- [results/figures/rollout_example.png](/Users/utente/pp1/hidden-dynamics/results/figures/rollout_example.png)
+- [results/figures/rollout_horizon_error.png](/Users/utente/pp1/hidden-dynamics/results/figures/rollout_horizon_error.png)
+- [results/figures/latent_pca_armed.png](/Users/utente/pp1/hidden-dynamics/results/figures/latent_pca_armed.png)
+- [results/figures/latent_pca_beacon_lit.png](/Users/utente/pp1/hidden-dynamics/results/figures/latent_pca_beacon_lit.png)
+- [results/figures/latent_pca_timestep.png](/Users/utente/pp1/hidden-dynamics/results/figures/latent_pca_timestep.png)
+- [results/figures/rollout_failure_cases.png](/Users/utente/pp1/hidden-dynamics/results/figures/rollout_failure_cases.png)
+- [results/figures/counterfactual_failure_case.png](/Users/utente/pp1/hidden-dynamics/results/figures/counterfactual_failure_case.png)
+- [results/checkpoints/evaluation_metrics.json](/Users/utente/pp1/hidden-dynamics/results/checkpoints/evaluation_metrics.json)
+- [results/checkpoints/latent_analysis_summary.json](/Users/utente/pp1/hidden-dynamics/results/checkpoints/latent_analysis_summary.json)
+- [results/checkpoints/failure_analysis.json](/Users/utente/pp1/hidden-dynamics/results/checkpoints/failure_analysis.json)
 
 ## Failure Modes
 
@@ -179,7 +179,7 @@ python main.py analyze
 ## Repository Layout
 
 ```text
-world-model-lab/
+hidden-dynamics/
   README.md
   PROJECT_SUMMARY.md
   config.py
