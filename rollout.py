@@ -70,6 +70,8 @@ def _greedy_actions_to_target(
     max_steps: int,
     seed: int,
 ) -> tuple[list[int], WorldState] | None:
+    # I kept this deliberately simple. The point is not to find optimal plans;
+    # it is just to build reproducible branch candidates for the counterfactual tests.
     env = SyntheticWorldEnv(grid_size=grid_size, max_steps=max_steps, seed=seed)
     rng = np.random.default_rng(seed)
     env.reset(state=initial_state)

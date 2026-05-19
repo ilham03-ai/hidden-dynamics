@@ -130,6 +130,8 @@ def build_failure_analysis(
     grid_size: int,
     failure_case_count: int,
 ) -> dict:
+    # This part is intentionally a bit ad hoc. I mostly use it to save a few
+    # representative misses so I can inspect them quickly after a run.
     episode_errors = rollout_results["episode_errors"]
     top_indices = np.argsort(episode_errors)[-failure_case_count:][::-1]
 
@@ -240,40 +242,6 @@ def build_failure_analysis(
     return analysis
 
 
-def _clean_counterfactual_summary(counterfactual_benchmark: dict) -> dict:
-    return {
-        "num_cases": int(counterfactual_benchmark["num_cases"]),
-        "raw_pair_accuracy": float(counterfactual_benchmark["pair_accuracy"]),
-        "raw_final_beacon_accuracy": float(counterfactual_benchmark["final_beacon_accuracy"]),
-        "raw_divergence_accuracy": float(counterfactual_benchmark["divergence_accuracy"]),
-    }
-
-
-def _counterfactual_ordering_metrics(cases: list[dict]) -> dict:
-    if not cases:
-        return {"probability_ordering_accuracy": 0.0, "mean_probability_gap": 0.0}
-    ordering_accuracy = float(
-        np.mean(
-            [
-                case["pred_switch_sequence"][-1, -1] > case["pred_direct_sequence"][-1, -1]
-                for case in cases
-            ]
-        )
-    )
-    mean_gap = float(
-        np.mean(
-            [
-                case["pred_switch_sequence"][-1, -1] - case["pred_direct_sequence"][-1, -1]
-                for case in cases
-            ]
-        )
-    )
-    return {
-        "probability_ordering_accuracy": ordering_accuracy,
-        "mean_probability_gap": mean_gap,
-    }
-
-
 def _calibrate_counterfactual_threshold(validation_cases: list[dict]) -> float:
     if not validation_cases:
         return 0.5
@@ -296,23 +264,64 @@ def _calibrate_counterfactual_threshold(validation_cases: list[dict]) -> float:
     return best_threshold
 
 
-def _evaluate_counterfactual_at_threshold(cases: list[dict], threshold: float) -> dict:
+def summarize_counterfactual_cases(cases: list[dict], threshold: float | None = None) -> dict:
     if not cases:
-        return {"threshold": float(threshold), "pair_accuracy": 0.0, "final_beacon_accuracy": 0.0}
-    pair_hits = []
-    final_hits = []
+        summary = {
+            "num_cases": 0,
+            "raw_pair_accuracy": 0.0,
+            "raw_final_beacon_accuracy": 0.0,
+            "raw_divergence_accuracy": 0.0,
+            "probability_ordering_accuracy": 0.0,
+            "mean_probability_gap": 0.0,
+        }
+        if threshold is not None:
+            summary["calibrated_threshold"] = float(threshold)
+            summary["calibrated_pair_accuracy"] = 0.0
+            summary["calibrated_final_beacon_accuracy"] = 0.0
+        return summary
+
+    raw_pair_hits = []
+    raw_final_hits = []
+    raw_divergence_hits = []
+    ordering_hits = []
+    probability_gaps = []
+    calibrated_pair_hits = []
+    calibrated_final_hits = []
+
     for case in cases:
-        direct_pred = float(case["pred_direct_sequence"][-1, -1] >= threshold)
-        switch_pred = float(case["pred_switch_sequence"][-1, -1] >= threshold)
-        direct_hit = direct_pred == case["true_direct_final_beacon"]
-        switch_hit = switch_pred == case["true_switch_then_beacon_final_beacon"]
-        final_hits.extend([direct_hit, switch_hit])
-        pair_hits.append(direct_hit and switch_hit)
-    return {
-        "threshold": float(threshold),
-        "pair_accuracy": float(np.mean(pair_hits)),
-        "final_beacon_accuracy": float(np.mean(final_hits)),
+        raw_pair_hits.append(case["paired_correct"])
+        raw_final_hits.extend([case["direct_correct"], case["switch_then_beacon_correct"]])
+        raw_divergence_hits.append(
+            (case["pred_switch_then_beacon_final_beacon"] - case["pred_direct_final_beacon"])
+            == (case["true_switch_then_beacon_final_beacon"] - case["true_direct_final_beacon"])
+        )
+
+        direct_score = float(case["pred_direct_sequence"][-1, -1])
+        switch_score = float(case["pred_switch_sequence"][-1, -1])
+        ordering_hits.append(switch_score > direct_score)
+        probability_gaps.append(switch_score - direct_score)
+
+        if threshold is not None:
+            direct_pred = float(direct_score >= threshold)
+            switch_pred = float(switch_score >= threshold)
+            direct_hit = direct_pred == case["true_direct_final_beacon"]
+            switch_hit = switch_pred == case["true_switch_then_beacon_final_beacon"]
+            calibrated_pair_hits.append(direct_hit and switch_hit)
+            calibrated_final_hits.extend([direct_hit, switch_hit])
+
+    summary = {
+        "num_cases": len(cases),
+        "raw_pair_accuracy": float(np.mean(raw_pair_hits)),
+        "raw_final_beacon_accuracy": float(np.mean(raw_final_hits)),
+        "raw_divergence_accuracy": float(np.mean(raw_divergence_hits)),
+        "probability_ordering_accuracy": float(np.mean(ordering_hits)),
+        "mean_probability_gap": float(np.mean(probability_gaps)),
     }
+    if threshold is not None:
+        summary["calibrated_threshold"] = float(threshold)
+        summary["calibrated_pair_accuracy"] = float(np.mean(calibrated_pair_hits))
+        summary["calibrated_final_beacon_accuracy"] = float(np.mean(calibrated_final_hits))
+    return summary
 
 
 def run_evaluation(checkpoint_path: str | Path) -> dict:
@@ -365,11 +374,11 @@ def run_evaluation(checkpoint_path: str | Path) -> dict:
     )
     latent_analysis = analyze_latent_space(model, train_split, test_split, device, evaluation_config)
     counterfactual_threshold = _calibrate_counterfactual_threshold(val_counterfactual_benchmark["cases"])
-    calibrated_counterfactual = _evaluate_counterfactual_at_threshold(
+    counterfactual_summary = summarize_counterfactual_cases(
         counterfactual_benchmark["cases"],
-        counterfactual_threshold,
+        threshold=counterfactual_threshold,
     )
-    counterfactual_ordering = _counterfactual_ordering_metrics(counterfactual_benchmark["cases"])
+    filtered_counterfactual_summary = summarize_counterfactual_cases(filtered_counterfactual_benchmark["cases"])
 
     plot_rollout_error_curve(
         rollout_results["stepwise_mse"],
@@ -426,14 +435,8 @@ def run_evaluation(checkpoint_path: str | Path) -> dict:
             "cumulative_mse_by_horizon": rollout_results["cumulative_mse"].tolist(),
         },
         "counterfactual_demo": demo_counterfactual,
-        "counterfactual_benchmark": {
-            **_clean_counterfactual_summary(counterfactual_benchmark),
-            **counterfactual_ordering,
-            "calibrated_threshold": float(counterfactual_threshold),
-            "calibrated_pair_accuracy": float(calibrated_counterfactual["pair_accuracy"]),
-            "calibrated_final_beacon_accuracy": float(calibrated_counterfactual["final_beacon_accuracy"]),
-        },
-        "filtered_counterfactual_diagnostic": _clean_counterfactual_summary(filtered_counterfactual_benchmark),
+        "counterfactual_benchmark": counterfactual_summary,
+        "filtered_counterfactual_diagnostic": filtered_counterfactual_summary,
         "latent_analysis": {
             "summary_text": latent_analysis["summary_text"],
             "linear_probe_accuracy": float(latent_analysis["linear_probe"]["accuracy"]),
