@@ -153,4 +153,4 @@ hidden-dynamics/
 - try a stochastic latent model instead of a deterministic one
 
 
-The agent runner requires `ANTHROPIC_API_KEY`. The framework tests run offline with `python3 -m pytest -q`.
+
