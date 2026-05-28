@@ -151,3 +151,6 @@ hidden-dynamics/
 - use a proper OOD split instead of only new random layouts
 - look at calibration directly rather than only thresholded accuracy
 - try a stochastic latent model instead of a deterministic one
+
+
+The agent runner requires `ANTHROPIC_API_KEY`. The framework tests run offline with `python3 -m pytest -q`.
